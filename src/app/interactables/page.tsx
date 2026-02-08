@@ -15,7 +15,10 @@ import { components, tools } from "@/lib/tambo";
 import { TamboProvider } from "@tambo-ai/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { SettingsPanel } from "./components/settings-panel";
+import { ImportWizard } from "@/components/budget/import-wizard";
+import { BudgetKpis } from "@/components/budget/budget-kpis";
+import { EnvelopeBoard } from "@/components/budget/envelope-board";
+import { TransactionsTable } from "@/components/budget/transactions-table";
 
 export default function InteractablesPage() {
   const [isChatOpen, setIsChatOpen] = useState(true);
@@ -75,7 +78,15 @@ export default function InteractablesPage() {
         {/* Main Content */}
         <div className="flex-1 overflow-auto">
           <div className="p-8">
-            <SettingsPanel />
+            <div className="max-w-6xl mx-auto space-y-4">
+              <BudgetKpis />
+              <ImportWizard />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <EnvelopeBoard />
+                <TransactionsTable onlyUncategorized />
+              </div>
+              <TransactionsTable title="All transactions" />
+            </div>
           </div>
         </div>
       </div>

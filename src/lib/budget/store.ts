@@ -1,6 +1,7 @@
 "use client";
 
 import type { BudgetState, UUID } from "@/lib/budget/types";
+import * as React from "react";
 
 const STORAGE_KEY = "budget-analyzer.state.v1";
 
@@ -97,7 +98,9 @@ export function updateBudgetState(
 
 export function subscribeBudgetState(fn: (state: BudgetState) => void) {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 /**
@@ -106,8 +109,9 @@ export function subscribeBudgetState(fn: (state: BudgetState) => void) {
 export function useBudgetState<Selected>(
   selector: (state: BudgetState) => Selected,
 ): Selected {
-  const React = require("react") as typeof import("react");
-  const [selected, setSelected] = React.useState(() => selector(getBudgetState()));
+  const [selected, setSelected] = React.useState(() =>
+    selector(getBudgetState()),
+  );
 
   React.useEffect(() => {
     return subscribeBudgetState((state) => setSelected(selector(state)));

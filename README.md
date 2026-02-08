@@ -1,131 +1,105 @@
-# Tambo Template
+# Budget Analyzer (Tambo-powered)
 
-This is a starter NextJS app with Tambo hooked up to get your AI app development started quickly.
+Budget Analyzer is an AI-assisted, local-first envelope budgeting app. Import a bank transaction CSV, map columns with a guided preview, and get an interactive dashboard (KPIs, envelopes, transactions) that you can also manage through a built-in Tambo chat assistant.
 
-## Get Started
+## What it does
 
-1. Run `npm create-tambo@latest my-tambo-app` for a new project
+- **CSV import**: Upload or paste a transactions CSV, preview headers + sample rows, then map fields and import.
+- **Budget dashboard**:
+  - **KPIs** for a month: income, expense, net, uncategorized count.
+  - **Envelope board**: budgeted vs spent vs remaining per category, with quick budget edits.
+  - **Transactions table**: search + month filter + quick categorization.
+- **AI assistant (Tambo)**: Ask questions like “show top spending categories” or “categorize these transactions” and have the assistant take structured actions via tools.
 
-2. `npm install`
+## How we used Tambo
 
-3. `npx tambo init`
+We use Tambo for both **generative UI** and **tool calling**:
 
-- or rename `example.env.local` to `.env.local` and add your tambo API key you can get for free [here](https://tambo.co/dashboard).
+- **Provider + chat**: The app is wrapped in `TamboProvider` and uses `MessageThreadFull` for the chat UI (`src/app/chat/page.tsx` and `src/app/interactables/page.tsx`).
+- **Generative components**: We register real React components with **Zod schemas** so the assistant can safely render UI in responses (`src/lib/tambo.ts`):
+  - `BudgetKpis`, `EnvelopeBoard`, `TransactionsTable`, `ImportWizard` (and `Graph` for charts).
+- **Tools (actions + queries)**: We register typed tools (with Zod input/output schemas) so the assistant can operate on your budget data (`src/services/budget/tools.ts`), including:
+  - CSV preview + commit import
+  - Envelope summary + setting monthly envelope budgets
+  - Listing uncategorized transactions + categorizing a transaction
+  - Spending by category + spending trends
 
-4. Run `npm run dev` and go to `localhost:3000` to use the app!
+## Data + privacy
 
-## Customizing
+This project is **local-first**: your imported transactions and budgeting state are stored in **browser localStorage** (see `src/lib/budget/store.ts`). No database is required to run the app.
 
-### Change what components tambo can control
+## Getting started
 
-You can see how components are registered with tambo in `src/lib/tambo.ts`:
+### Prerequisites
 
-```tsx
-export const components: TamboComponent[] = [
-  {
-    name: "Graph",
-    description:
-      "A component that renders various types of charts (bar, line, pie) using Recharts. Supports customizable data visualization with labels, datasets, and styling options.",
-    component: Graph,
-    propsSchema: graphSchema,
-  },
-  // Add more components here
-];
-```
+- Node.js + npm (recommended: Node 18+)
+- A Tambo API key from the dashboard at `https://tambo.co/dashboard`
 
-You can install the graph component into any project with:
+### Setup
+
+1. Install dependencies
 
 ```bash
-npx tambo add graph
+npm install
 ```
 
-The example Graph component demonstrates several key features:
+2. Create `.env.local`
 
-- Different prop types (strings, arrays, enums, nested objects)
-- Multiple chart types (bar, line, pie)
-- Customizable styling (variants, sizes)
-- Optional configurations (title, legend, colors)
-- Data visualization capabilities
+Copy `example.env.local` to `.env.local` and set your key:
 
-Update the `components` array with any component(s) you want tambo to be able to use in a response!
-
-You can find more information about the options [here](https://docs.tambo.co/concepts/generative-interfaces/generative-components)
-
-### Add tools for tambo to use
-
-Tools are defined with `inputSchema` and `outputSchema`:
-
-```tsx
-export const tools: TamboTool[] = [
-  {
-    name: "globalPopulation",
-    description:
-      "A tool to get global population trends with optional year range filtering",
-    tool: getGlobalPopulationTrend,
-    inputSchema: z.object({
-      startYear: z.number().optional(),
-      endYear: z.number().optional(),
-    }),
-    outputSchema: z.array(
-      z.object({
-        year: z.number(),
-        population: z.number(),
-        growthRate: z.number(),
-      }),
-    ),
-  },
-];
+```env
+NEXT_PUBLIC_TAMBO_API_KEY=your-api-key-here
 ```
 
-Find more information about tools [here.](https://docs.tambo.co/concepts/tools)
+Optional (only if running a custom Tambo server):
 
-### The Magic of Tambo Requires the TamboProvider
-
-Make sure in the TamboProvider wrapped around your app:
-
-```tsx
-...
-<TamboProvider
-  apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
-  components={components} // Array of components to control
-  tools={tools} // Array of tools it can use
->
-  {children}
-</TamboProvider>
+```env
+NEXT_PUBLIC_TAMBO_URL=http://localhost:3001
 ```
 
-In this example we do this in the `Layout.tsx` file, but you can do it anywhere in your app that is a client component.
+3. Run the app
 
-### Voice input
-
-The template includes a `DictationButton` component using the `useTamboVoice` hook for speech-to-text input.
-
-### MCP (Model Context Protocol)
-
-The template includes MCP support for connecting to external tools and resources. You can use the MCP hooks from `@tambo-ai/react/mcp`:
-
-- `useTamboMcpPromptList` - List available prompts from MCP servers
-- `useTamboMcpPrompt` - Get a specific prompt
-- `useTamboMcpResourceList` - List available resources
-
-See `src/components/tambo/mcp-components.tsx` for example usage.
-
-### Change where component responses are shown
-
-The components used by tambo are shown alongside the message response from tambo within the chat thread, but you can have the result components show wherever you like by accessing the latest thread message's `renderedComponent` field:
-
-```tsx
-const { thread } = useTambo();
-const latestComponent =
-  thread?.messages[thread.messages.length - 1]?.renderedComponent;
-
-return (
-  <div>
-    {latestComponent && (
-      <div className="my-custom-wrapper">{latestComponent}</div>
-    )}
-  </div>
-);
+```bash
+npm run dev
 ```
 
-For more detailed documentation, visit [Tambo's official docs](https://docs.tambo.co).
+Open `http://localhost:3000`.
+
+## How to use
+
+1. Go to **Interactables Demo** at `/interactables` for the budgeting UI + chat sidebar.
+2. Use **Import CSV** to upload or paste your transactions export.
+3. Map fields (date/account/amount required), then click **Import**.
+4. Review:
+   - **KPIs** for the current month
+   - **Envelopes** (set budgets, see remaining)
+   - **Uncategorized transactions** (assign categories quickly)
+5. Use the assistant for actions and analysis, for example:
+   - “List uncategorized transactions for this month and categorize coffee as Dining.”
+   - “Set a $300 budget for Groceries for 2026-02.”
+   - “Show spending by category for this month.”
+   - “Show a daily spending trend for this month.”
+
+## Repo structure (key files)
+
+- `src/lib/tambo.ts`: registers Tambo components + tools (schemas included)
+- `src/services/budget/tools.ts`: tool implementations used by the assistant
+- `src/components/budget/*`: KPI header, envelope board, CSV import wizard, transaction table
+- `src/lib/budget/store.ts`: local storage budget state + subscriptions
+- `budgetschema.sql`: reference schema (useful for understanding entities/relationships)
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm run lint:fix
+npm run init   # runs: npx tambo init
+```
+
+## Notes
+
+- Keep `.env.local` private and **do not commit** it to source control.
+- For Tambo docs, see `https://docs.tambo.co`.

@@ -1209,9 +1209,19 @@ export interface MessageInputFileButtonProps extends React.ButtonHTMLAttributes<
 const MessageInputFileButton = React.forwardRef<
   HTMLButtonElement,
   MessageInputFileButtonProps
->(({ className, accept = "image/*", multiple = true, ...props }, ref) => {
+>(
+  (
+    {
+      className,
+      accept = "image/*,.csv,text/csv",
+      multiple = true,
+      ...props
+    },
+    ref,
+  ) => {
   const { addImages, images } = useTamboThreadInput();
-  const { setImageError } = useMessageInputContext();
+  const { setImageError, setSubmitError, setValue, editorRef } =
+    useMessageInputContext();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
@@ -1222,7 +1232,15 @@ const MessageInputFileButton = React.forwardRef<
     const files = Array.from(e.target.files ?? []);
 
     try {
-      const totalImages = images.length + files.length;
+      const imageFiles = files.filter((f) => f.type.startsWith("image/"));
+      const csvFiles = files.filter(
+        (f) =>
+          f.type === "text/csv" ||
+          f.name.toLowerCase().endsWith(".csv") ||
+          f.type === "application/vnd.ms-excel",
+      );
+
+      const totalImages = images.length + imageFiles.length;
 
       if (totalImages > MAX_IMAGES) {
         setImageError(`Max ${MAX_IMAGES} uploads at a time`);
@@ -1231,7 +1249,46 @@ const MessageInputFileButton = React.forwardRef<
       }
 
       setImageError(null);
-      await addImages(files);
+
+      // Handle CSV: read and insert into editor input
+      if (csvFiles.length > 0) {
+        const file = csvFiles[0]!;
+        const text = await file.text();
+        const MAX_CHARS = 200_000;
+        if (text.length > MAX_CHARS) {
+          setSubmitError(
+            `CSV is too large to paste into chat (${text.length} chars). Use the Import Wizard on /interactables instead.`,
+          );
+        } else {
+          const payload = [
+            `Please import this CSV into my budget data. Use importCsvPreview first, then importCsvCommit.`,
+            ``,
+            `Filename: ${file.name}`,
+            ``,
+            text,
+          ].join("\n");
+
+          const editor = editorRef.current;
+          if (editor) {
+            editor.setContent(payload);
+            editor.focus("end");
+          }
+          setValue(payload);
+          setSubmitError(null);
+        }
+      }
+
+      // Handle images (existing behavior)
+      if (imageFiles.length > 0) {
+        await addImages(imageFiles);
+      }
+
+      // If user selected neither images nor CSV, show a helpful error
+      if (imageFiles.length === 0 && csvFiles.length === 0 && files.length > 0) {
+        setSubmitError(
+          "Unsupported file type. This button supports images and CSV files.",
+        );
+      }
     } catch (error) {
       console.error("Failed to add selected files:", error);
     }
@@ -1245,13 +1302,13 @@ const MessageInputFileButton = React.forwardRef<
   );
 
   return (
-    <Tooltip content="Attach Images" side="top">
+    <Tooltip content="Attach Images or CSV" side="top">
       <button
         ref={ref}
         type="button"
         onClick={handleClick}
         className={buttonClasses}
-        aria-label="Attach Images"
+        aria-label="Attach Images or CSV"
         data-slot="message-input-file-button"
         {...props}
       >
