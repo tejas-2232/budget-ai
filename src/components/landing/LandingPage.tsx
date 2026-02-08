@@ -8,6 +8,11 @@ import * as React from "react";
 import { PointerSpotlight } from "./PointerSpotlight";
 import { InteractiveCard } from "./InteractiveCard";
 import { useActiveSection } from "./useActiveSection";
+import { ThemeToggle } from "./ThemeToggle";
+import { HeroMedia } from "./HeroMedia";
+import { HeroWidget } from "./HeroWidget";
+import { Sparkles, WandSparkles } from "lucide-react";
+import { FloatingIcons } from "./FloatingIcons";
 
 const SECTION_IDS = ["home", "projects", "about"] as const;
 
@@ -105,6 +110,7 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <a
               href="/interactables"
               className={cn(
@@ -123,67 +129,74 @@ export default function LandingPage() {
       <main className="max-w-6xl mx-auto px-6 md:px-8">
         {/* HOME */}
         <section id="home" className="pt-14 md:pt-18 pb-16 md:pb-20">
-          <div className="max-w-3xl">
-            <h1 className="text-[42px] leading-[1.08] md:text-[52px] font-semibold tracking-tight">
-              See where your money is going—clearly.
-            </h1>
-            <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-              Import a CSV, assign categories, and set envelope budgets in minutes.
-              <br />
-              Your data stays in your browser. No login. No hidden syncing.
-            </p>
+          <div className="relative">
+            <HeroMedia />
+            <FloatingIcons />
+            <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-7">
+                <h1 className="text-[42px] leading-[1.08] md:text-[52px] font-semibold tracking-tight">
+                  See where your money is going—clearly.
+                </h1>
+                <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
+                  Import a CSV, assign categories, and set envelope budgets in minutes.
+                  <br />
+                  Your data stays in your browser. No login. No hidden syncing.
+                </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a
-                href="/interactables"
-                className={cn(
-                  "px-5 py-3 rounded-md font-medium",
-                  "bg-primary text-primary-foreground hover:bg-primary/90",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                )}
-              >
-                Open workspace
-              </a>
-              <a
-                href="/chat"
-                className={cn(
-                  "px-5 py-3 rounded-md font-medium",
-                  "border border-border hover:bg-muted",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                )}
-              >
-                Try chat
-              </a>
-              <span className="text-xs text-muted-foreground">
-                Start with a sample CSV
-              </span>
-            </div>
+                <div className="mt-8 flex flex-wrap items-center gap-3">
+                  <a
+                    href="/interactables"
+                    className={cn(
+                      "px-5 py-3 rounded-md font-medium",
+                      "bg-primary text-primary-foreground hover:bg-primary/90",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    )}
+                  >
+                    Open workspace
+                  </a>
+                  <a
+                    href="/chat"
+                    className={cn(
+                      "px-5 py-3 rounded-md font-medium",
+                      "border border-border hover:bg-muted",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    )}
+                  >
+                    Try chat
+                  </a>
+                  <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" /> Start with a sample CSV
+                  </span>
+                </div>
 
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                {
-                  title: "Stored locally",
-                  body: "Saved in your browser on this device.",
-                },
-                {
-                  title: "Explainable",
-                  body: "Categories and envelopes you can verify.",
-                },
-                {
-                  title: "Monthly clarity",
-                  body: "Budgeted / spent / remaining at a glance.",
-                },
-              ].map((item) => (
-                <InteractiveCard
-                  key={item.title}
-                  className="p-4 bg-card/80"
-                >
-                  <div className="text-sm font-medium">{item.title}</div>
-                  <div className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    {item.body}
-                  </div>
-                </InteractiveCard>
-              ))}
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    {
+                      title: "Stored locally",
+                      body: "Saved in your browser on this device.",
+                    },
+                    {
+                      title: "Explainable",
+                      body: "Categories and envelopes you can verify.",
+                    },
+                    {
+                      title: "Monthly clarity",
+                      body: "Budgeted / spent / remaining at a glance.",
+                    },
+                  ].map((item) => (
+                    <InteractiveCard key={item.title} className="p-4 bg-card/80">
+                      <div className="text-sm font-medium">{item.title}</div>
+                      <div className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                        {item.body}
+                      </div>
+                    </InteractiveCard>
+                  ))}
+                </div>
+              </div>
+
+              <div className="lg:col-span-5">
+                <HeroWidget />
+              </div>
             </div>
           </div>
 
@@ -221,6 +234,10 @@ export default function LandingPage() {
                     <div className="text-sm text-muted-foreground mt-1">
                       Add your Tambo key to enable chat-powered actions (import, categorization, insights).
                     </div>
+                    <div className="mt-3 text-xs text-muted-foreground inline-flex items-center gap-1">
+                      <WandSparkles className="w-3.5 h-3.5" />
+                      Tip: You can attach a CSV directly in chat now.
+                    </div>
                   </div>
                   <a
                     href="/interactables"
@@ -250,7 +267,7 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InteractiveCard className="p-5">
+            <InteractiveCard className="p-5 gradient-border">
               <div className="text-sm font-semibold">Local workspace</div>
               <div className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 Transactions, categories, and budgets are saved in your browser storage.
@@ -286,7 +303,7 @@ export default function LandingPage() {
               </div>
             </InteractiveCard>
 
-            <InteractiveCard className="p-5">
+            <InteractiveCard className="p-5 gradient-border">
               <div className="text-sm font-semibold">Sample CSV</div>
               <div className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 Download a ready-made file to test the full flow.
@@ -329,19 +346,19 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InteractiveCard className="p-5">
+            <InteractiveCard className="p-5 gradient-border">
               <div className="text-sm font-semibold">What this is</div>
               <div className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 A CSV-based budgeting tool: import → categorize → set envelopes → review.
               </div>
             </InteractiveCard>
-            <InteractiveCard className="p-5">
+            <InteractiveCard className="p-5 gradient-border">
               <div className="text-sm font-semibold">What we store</div>
               <div className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 Accounts, transactions, categories (envelopes), monthly budgets, and tags.
               </div>
             </InteractiveCard>
-            <InteractiveCard className="p-5">
+            <InteractiveCard className="p-5 gradient-border">
               <div className="text-sm font-semibold">What we don’t do</div>
               <div className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 No login. No bank sync. No cloud storage in this version.

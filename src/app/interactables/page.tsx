@@ -22,6 +22,7 @@ import { TransactionsTable } from "@/components/budget/transactions-table";
 import { InsightsPanel } from "@/components/budget/insights-panel";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/landing/ThemeToggle";
 
 export default function InteractablesPage() {
   const [isChatOpen, setIsChatOpen] = useState(true);
@@ -107,6 +108,7 @@ export default function InteractablesPage() {
                 >
                   Chat-only
                 </Link>
+                <ThemeToggle />
                 <button
                   type="button"
                   onClick={() => setShowAdvanced((v) => !v)}

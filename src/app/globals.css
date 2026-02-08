@@ -78,14 +78,15 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  /* Calm accent in dark mode (teal, high contrast) */
+  --primary: oklch(0.78 0.12 195);
+  --primary-foreground: oklch(0.16 0.02 195);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --accent: oklch(0.22 0.01 260);
+  --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -134,6 +135,22 @@
     linear-gradient(to bottom, oklch(1 0 0), oklch(0.99 0.005 260));
 }
 
+/* Night hint: deeper base + brighter calm spotlight */
+.theme-night .landing-spotlight {
+  background:
+    radial-gradient(
+      900px circle at var(--spot-x) var(--spot-y),
+      oklch(0.35 0.08 195 / 0.6),
+      transparent 55%
+    ),
+    radial-gradient(
+      700px circle at 80% 20%,
+      oklch(0.28 0.04 260 / 0.5),
+      transparent 60%
+    ),
+    linear-gradient(to bottom, oklch(0.18 0.01 260), oklch(0.14 0.01 260));
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing-spotlight {
     background:
@@ -152,6 +169,80 @@
     radial-gradient(900px circle at 20% 0%, oklch(0.98 0.015 260 / 0.9), transparent 55%),
     radial-gradient(700px circle at 80% 30%, oklch(0.98 0.02 200 / 0.7), transparent 60%),
     linear-gradient(to bottom, oklch(1 0 0), oklch(0.99 0.005 260));
+}
+
+.theme-night .workspace-bg {
+  background:
+    radial-gradient(900px circle at 20% 0%, oklch(0.3 0.03 260 / 0.45), transparent 55%),
+    radial-gradient(700px circle at 80% 30%, oklch(0.32 0.06 195 / 0.35), transparent 60%),
+    linear-gradient(to bottom, oklch(0.2 0.01 260), oklch(0.16 0.01 260));
+}
+
+/* Hero media overlay to preserve readability */
+.hero-media-overlay {
+  /* Keep left side readable while letting the video show through */
+  background:
+    linear-gradient(
+      to right,
+      oklch(1 0 0 / 0.92) 0%,
+      oklch(1 0 0 / 0.82) 32%,
+      oklch(1 0 0 / 0.35) 55%,
+      transparent 72%
+    ),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.78), oklch(1 0 0 / 0.92));
+}
+.theme-night .hero-media-overlay {
+  background:
+    linear-gradient(
+      to right,
+      oklch(0.18 0.01 260 / 0.72) 0%,
+      oklch(0.18 0.01 260 / 0.55) 32%,
+      oklch(0.18 0.01 260 / 0.25) 55%,
+      transparent 72%
+    ),
+    linear-gradient(to bottom, oklch(0.18 0.01 260 / 0.35), oklch(1 0 0 / 0.92));
+}
+
+/* Subtle sheen used in hero widget */
+.hero-sheen {
+  background:
+    radial-gradient(600px circle at 20% 20%, oklch(1 0 0 / 0.9), transparent 60%),
+    radial-gradient(500px circle at 80% 30%, oklch(0.98 0.03 200 / 0.5), transparent 60%);
+  mix-blend-mode: overlay;
+}
+
+/* Make hero video visible against night hint backgrounds */
+.hero-video {
+  opacity: 0.62;
+  filter: saturate(1.22) contrast(1.08);
+}
+.theme-night .hero-video {
+  opacity: 0.72 !important;
+  filter: saturate(1.28) contrast(1.12);
+}
+
+/* Subtle gradient border utility for "premium" cards */
+.gradient-border {
+  background:
+    linear-gradient(var(--color-card), var(--color-card)) padding-box,
+    linear-gradient(
+        90deg,
+        oklch(0.78 0.14 195 / 0.55),
+        oklch(0.72 0.12 300 / 0.35),
+        oklch(0.86 0.12 60 / 0.35)
+      )
+      border-box;
+  border: 1px solid transparent;
+}
+
+/* Floating icon badges in hero */
+@keyframes float-soft {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+.float-soft {
+  animation: float-soft 6s ease-in-out infinite;
 }
 
 /*

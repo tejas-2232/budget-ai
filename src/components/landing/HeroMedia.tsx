@@ -27,7 +27,7 @@ export function HeroMedia({ className }: { className?: string }) {
       {/* Video layer (best performance). Auto hides on error. */}
       {showVideo && (
         <video
-          className="absolute inset-0 w-full h-full object-cover opacity-30 dark:opacity-25 hero-video"
+          className="absolute inset-0 w-full h-full object-cover hero-video"
           autoPlay
           muted
           loop
@@ -46,7 +46,7 @@ export function HeroMedia({ className }: { className?: string }) {
         <img
           src="/hero-bg.gif"
           alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-20 dark:opacity-15 hero-video"
+          className="absolute inset-0 w-full h-full object-cover hero-video"
           onError={() => setShowGif(false)}
         />
       )}

@@ -19,6 +19,26 @@ export function HeroWidget({ className }: { className?: string }) {
     { label: "Eating Out", budgeted: 3000, spent: 2100 },
   ];
 
+  const colorFor = (label: string) => {
+    switch (label) {
+      case "Groceries":
+        return {
+          edge: "oklch(0.76 0.14 150)",
+          fill: "oklch(0.86 0.12 150 / 0.35)",
+        };
+      case "Rent":
+        return {
+          edge: "oklch(0.7 0.14 300)",
+          fill: "oklch(0.85 0.1 300 / 0.3)",
+        };
+      default:
+        return {
+          edge: "oklch(0.78 0.14 60)",
+          fill: "oklch(0.9 0.12 60 / 0.28)",
+        };
+    }
+  };
+
   const valueFor = (c: (typeof cards)[number]) => {
     const remaining = Math.max(0, c.budgeted - c.spent);
     if (mode === "budgeted") return c.budgeted;
@@ -84,8 +104,16 @@ export function HeroWidget({ className }: { className?: string }) {
           {cards.map((c) => {
             const v = valueFor(c);
             const pct = c.budgeted > 0 ? Math.min(1, c.spent / c.budgeted) : 0;
+            const col = colorFor(c.label);
             return (
-              <div key={c.label} className="rounded-xl border border-muted bg-container p-3">
+              <div
+                key={c.label}
+                className="rounded-xl border border-muted bg-container p-3"
+                style={{
+                  background:
+                    `linear-gradient(90deg, ${col.fill}, transparent 65%), var(--container)`,
+                }}
+              >
                 <div className="flex items-center justify-between gap-3">
                   <div className="font-medium">{c.label}</div>
                   <div className="text-sm font-semibold tabular-nums">
@@ -94,8 +122,11 @@ export function HeroWidget({ className }: { className?: string }) {
                 </div>
                 <div className="mt-2 h-2 rounded-full bg-muted overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-primary/80"
-                    style={{ width: `${Math.round(pct * 100)}%` }}
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.round(pct * 100)}%`,
+                      background: `linear-gradient(90deg, ${col.edge}, var(--primary))`,
+                    }}
                   />
                 </div>
               </div>
