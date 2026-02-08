@@ -146,6 +146,14 @@
   }
 }
 
+/* Calm workspace background (subtle, static) */
+.workspace-bg {
+  background:
+    radial-gradient(900px circle at 20% 0%, oklch(0.98 0.015 260 / 0.9), transparent 55%),
+    radial-gradient(700px circle at 80% 30%, oklch(0.98 0.02 200 / 0.7), transparent 60%),
+    linear-gradient(to bottom, oklch(1 0 0), oklch(0.99 0.005 260));
+}
+
 /*
 This is a custom animation for the interactable components.
 It's used to highlight the fields that have been updated.

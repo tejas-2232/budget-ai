@@ -99,12 +99,6 @@ export function InteractiveCard({
         href={href}
         ref={(node) => {
           ref.current = node;
-          if (typeof anchorProps.ref === "function") {
-            anchorProps.ref(node);
-          } else if (anchorProps.ref && typeof anchorProps.ref === "object") {
-            (anchorProps.ref as React.MutableRefObject<HTMLAnchorElement | null>).current =
-              node;
-          }
         }}
         onPointerMove={handleMove}
         onPointerLeave={handleLeave}
@@ -119,12 +113,6 @@ export function InteractiveCard({
       {...divProps}
       ref={(node) => {
         ref.current = node;
-        if (typeof divProps.ref === "function") {
-          divProps.ref(node);
-        } else if (divProps.ref && typeof divProps.ref === "object") {
-          (divProps.ref as React.MutableRefObject<HTMLDivElement | null>).current =
-            node;
-        }
       }}
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
