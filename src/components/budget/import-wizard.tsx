@@ -38,8 +38,18 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
   const [preview, setPreview] = React.useState<ReturnType<typeof previewCsvImport> | null>(null);
   const [mapping, setMapping] = React.useState<CsvMapping>({});
   const [result, setResult] = React.useState<ImportCommitResult | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<
+    | string
+    | null
+    | {
+        title: string;
+        body: string;
+        details?: string;
+      }
+  >(null);
   const [isBusy, setIsBusy] = React.useState(false);
+  const [showPaste, setShowPaste] = React.useState(false);
+  const [showPreview, setShowPreview] = React.useState(false);
 
   const loadPreview = React.useCallback((text: string) => {
     try {
@@ -48,7 +58,11 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
       setMapping(p.suggestedMapping ?? {});
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to parse CSV");
+      setError({
+        title: "We couldn’t read that CSV yet.",
+        body: "Check that it includes a header row and uses commas to separate columns.",
+        details: e instanceof Error ? e.message : undefined,
+      });
       setPreview(null);
     }
   }, []);
@@ -66,13 +80,19 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
       setIsBusy(true);
       setError(null);
       const res = await fetch("/sample-transactions.csv");
-      if (!res.ok) throw new Error("Failed to load sample CSV");
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} while loading sample CSV`);
+      }
       const text = await res.text();
       setFilename("sample-transactions.csv");
       setCsvText(text);
       loadPreview(text);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load sample CSV");
+      setError({
+        title: "We couldn’t load the sample file.",
+        body: "Refresh the page and try again.",
+        details: e instanceof Error ? e.message : undefined,
+      });
     } finally {
       setIsBusy(false);
     }
@@ -98,7 +118,16 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
 
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="rounded-lg border border-muted bg-container p-3">
-          <div className="text-xs text-muted-foreground mb-2">Upload</div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-xs text-muted-foreground">Step 1: Choose a CSV</div>
+            <button
+              type="button"
+              onClick={() => setShowPaste((v) => !v)}
+              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
+            >
+              {showPaste ? "Hide paste" : "Paste instead"}
+            </button>
+          </div>
           <input
             type="file"
             accept=".csv,text/csv"
@@ -116,45 +145,109 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
           >
             Load sample CSV
           </button>
-          <div className="text-xs text-muted-foreground mt-2">
-            Or paste CSV below.
+          <div className="text-xs text-muted-foreground mt-2 leading-relaxed">
+            We’ll ask you to confirm the required columns before importing.
           </div>
         </div>
 
         <div className="rounded-lg border border-muted bg-container p-3">
-          <div className="text-xs text-muted-foreground mb-2">CSV text</div>
-          <textarea
-            value={csvText}
-            onChange={(e) => {
-              setCsvText(e.target.value);
-            }}
-            onBlur={() => {
-              if (csvText.trim()) loadPreview(csvText);
-            }}
-            placeholder="date,account,amount,currency,description,merchant,category,tags,notes"
-            className="w-full h-28 rounded-md border border-border bg-background p-2 text-xs font-mono"
-          />
+          <div className="text-xs text-muted-foreground mb-2">Step 2: Preview</div>
+          <div className="text-sm text-muted-foreground leading-relaxed">
+            {preview
+              ? `Found ${preview.rowCount} rows in “${filename}”.`
+              : "Load a CSV to preview headers and mapping."}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={isBusy || !csvText.trim()}
+              onClick={() => loadPreview(csvText)}
+              className={cn(
+                "px-3 py-2 rounded-md text-sm border border-border bg-background hover:bg-muted",
+                (!csvText.trim() || isBusy) && "opacity-50 cursor-not-allowed",
+              )}
+            >
+              Preview CSV
+            </button>
+            {preview && (
+              <button
+                type="button"
+                onClick={() => setShowPreview((v) => !v)}
+                className="px-3 py-2 rounded-md text-sm border border-border bg-background hover:bg-muted"
+              >
+                {showPreview ? "Hide sample rows" : "Show sample rows"}
+              </button>
+            )}
+          </div>
+
+          {showPaste && (
+            <div className="mt-3">
+              <div className="text-xs text-muted-foreground mb-2">Paste CSV</div>
+              <textarea
+                value={csvText}
+                onChange={(e) => setCsvText(e.target.value)}
+                placeholder="date,account,amount,currency,description,merchant,category,tags,notes"
+                className="w-full h-28 rounded-md border border-border bg-background p-2 text-xs font-mono"
+              />
+            </div>
+          )}
         </div>
       </div>
 
-      {error && <div className="mt-3 text-sm text-destructive">{error}</div>}
+      {typeof error === "string" && (
+        <div className="mt-3 text-sm text-destructive">{error}</div>
+      )}
+      {error && typeof error === "object" && (
+        <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+          <div className="text-sm font-medium text-destructive">{error.title}</div>
+          <div className="text-sm text-muted-foreground mt-1">{error.body}</div>
+          {error.details && (
+            <details className="mt-2">
+              <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                Show details
+              </summary>
+              <pre className="mt-2 text-xs text-muted-foreground overflow-auto max-h-40 whitespace-pre-wrap">
+                {error.details}
+              </pre>
+            </details>
+          )}
+          <div className="mt-2 flex flex-wrap gap-2">
+            <a
+              href="/sample-transactions.csv"
+              download
+              className="px-3 py-1.5 rounded-md text-xs border border-border bg-background hover:bg-muted"
+            >
+              Download sample CSV
+            </a>
+          </div>
+        </div>
+      )}
 
       {preview && (
         <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
           <div className="rounded-lg border border-muted bg-container p-3">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium">Mapping</div>
-              <div className="text-xs text-muted-foreground">
-                Rows: {preview.rowCount}
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-medium">Step 3: Map columns</div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  Required: date, account, amount
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setMapping(preview.suggestedMapping ?? {})}
+                className="px-3 py-1.5 rounded-md text-xs border border-border bg-background hover:bg-muted"
+              >
+                Auto-detect
+              </button>
             </div>
 
             <div className="mt-3 space-y-2">
-              {FIELD_LABELS.map((f) => (
+              {FIELD_LABELS.filter((f) => f.required).map((f) => (
                 <div key={String(f.key)} className="flex items-center gap-2">
                   <div className="w-28 text-xs text-muted-foreground">
                     {f.label}
-                    {f.required ? <span className="text-destructive">*</span> : null}
+                    <span className="text-destructive">*</span>
                   </div>
                   <select
                     className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm"
@@ -163,7 +256,7 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
                       setMapping((m) => ({ ...m, [f.key]: e.target.value || undefined }))
                     }
                   >
-                    <option value="">(none)</option>
+                    <option value="">Select a column</option>
                     {preview.headers.map((h) => (
                       <option key={h} value={h}>
                         {h}
@@ -174,17 +267,61 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
               ))}
             </div>
 
+            <details className="mt-4">
+              <summary className="text-sm text-muted-foreground cursor-pointer hover:text-foreground">
+                Add more columns (optional)
+              </summary>
+              <div className="mt-3 space-y-2">
+                {FIELD_LABELS.filter((f) => !f.required).map((f) => (
+                  <div key={String(f.key)} className="flex items-center gap-2">
+                    <div className="w-28 text-xs text-muted-foreground">{f.label}</div>
+                    <select
+                      className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm"
+                      value={(mapping[f.key] ?? "") as string}
+                      onChange={(e) =>
+                        setMapping((m) => ({ ...m, [f.key]: e.target.value || undefined }))
+                      }
+                    >
+                      <option value="">(none)</option>
+                      {preview.headers.map((h) => (
+                        <option key={h} value={h}>
+                          {h}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 text-xs text-muted-foreground leading-relaxed">
+                Tip: If your CSV includes a <span className="font-medium">category</span>, we’ll save it as a single split equal to the full amount.
+              </div>
+            </details>
+
             <button
               disabled={!canCommit}
               onClick={async () => {
+                setIsBusy(true);
+                setResult(null);
+                setError(null);
                 try {
-                  setIsBusy(true);
-                  setResult(null);
-                  setError(null);
                   const res = commitCsvImport({ csvText, mapping, filename });
                   setResult(res);
+                  if (res.failedRows > 0) {
+                    setError({
+                      title: "Some rows need attention.",
+                      body: "We imported what we could. Fix the failed rows and re-import (duplicates are ignored).",
+                      details: res.errors
+                        .slice(0, 8)
+                        .map((x) => `Row ${x.rowNumber}: ${x.message}`)
+                        .join("\n"),
+                    });
+                  }
                 } catch (e) {
-                  setError(e instanceof Error ? e.message : "Import failed");
+                  setError({
+                    title: "Import didn’t finish.",
+                    body: "Try again. If it keeps happening, start with the sample CSV to confirm the format.",
+                    details: e instanceof Error ? e.message : undefined,
+                  });
                 } finally {
                   setIsBusy(false);
                 }
@@ -198,44 +335,46 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
             >
               {isBusy ? "Importing..." : "Import"}
             </button>
-          </div>
-
-          <div className="rounded-lg border border-muted bg-container p-3">
-            <div className="text-sm font-medium">Preview</div>
-            <div className="mt-2 overflow-auto max-h-64">
-              <table className="min-w-full text-xs">
-                <thead className="text-muted-foreground">
-                  <tr>
-                    {preview.headers.slice(0, 6).map((h) => (
-                      <th key={h} className="text-left py-1 pr-2 whitespace-nowrap">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {preview.sampleRows.slice(0, 6).map((r, idx) => (
-                    <tr key={idx} className="border-t border-muted">
-                      {preview.headers.slice(0, 6).map((h) => (
-                        <td key={h} className="py-1 pr-2 whitespace-nowrap">
-                          {r[h]}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
 
             {result && (
-              <div className="mt-3 text-xs">
-                <div className="font-medium">Imported</div>
-                <div className="text-muted-foreground mt-1">
-                  {result.successRows}/{result.totalRows} rows • {result.failedRows} failed
-                </div>
+              <div className="mt-3 text-xs text-muted-foreground">
+                Imported {result.successRows}/{result.totalRows} rows • {result.failedRows} failed
               </div>
             )}
           </div>
+
+          {showPreview && (
+            <div className="rounded-lg border border-muted bg-container p-3">
+              <div className="text-sm font-medium">Sample rows</div>
+              <div className="mt-2 overflow-auto max-h-64">
+                <table className="min-w-full text-xs">
+                  <thead className="text-muted-foreground">
+                    <tr>
+                      {preview.headers.slice(0, 6).map((h) => (
+                        <th key={h} className="text-left py-1 pr-2 whitespace-nowrap">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {preview.sampleRows.slice(0, 6).map((r, idx) => (
+                      <tr key={idx} className="border-t border-muted">
+                        {preview.headers.slice(0, 6).map((h) => (
+                          <td key={h} className="py-1 pr-2 whitespace-nowrap">
+                            {r[h]}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-3 text-xs text-muted-foreground">
+                Showing the first few columns for quick validation.
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

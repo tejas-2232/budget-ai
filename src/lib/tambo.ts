@@ -32,7 +32,6 @@ import {
   importCsvCommit,
   importCsvPreview,
   setEnvelopeBudget,
-  type CsvMapping,
 } from "@/services/budget/tools";
 import type { TamboComponent } from "@tambo-ai/react";
 import { TamboTool } from "@tambo-ai/react";

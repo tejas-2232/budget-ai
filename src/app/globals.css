@@ -116,6 +116,36 @@
   }
 }
 
+/* Calm pointer-following spotlight for the landing page */
+.landing-spotlight {
+  --spot-x: 50%;
+  --spot-y: 140px;
+  background:
+    radial-gradient(
+      900px circle at var(--spot-x) var(--spot-y),
+      oklch(0.97 0.03 200 / 0.9),
+      transparent 55%
+    ),
+    radial-gradient(
+      700px circle at 80% 20%,
+      oklch(0.98 0.02 260 / 0.7),
+      transparent 60%
+    ),
+    linear-gradient(to bottom, oklch(1 0 0), oklch(0.99 0.005 260));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-spotlight {
+    background:
+      radial-gradient(
+        900px circle at 50% 140px,
+        oklch(0.97 0.03 200 / 0.9),
+        transparent 55%
+      ),
+      linear-gradient(to bottom, oklch(1 0 0), oklch(0.99 0.005 260));
+  }
+}
+
 /*
 This is a custom animation for the interactable components.
 It's used to highlight the fields that have been updated.
