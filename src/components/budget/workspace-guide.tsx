@@ -57,6 +57,7 @@ function Step({
   icon,
   onClick,
   cta = "Go",
+  tone,
 }: {
   done: boolean;
   title: string;
@@ -64,17 +65,46 @@ function Step({
   icon: React.ReactNode;
   onClick: () => void;
   cta?: string;
+  tone: "green" | "cyan" | "amber" | "purple";
 }) {
+  const toneVars: Record<
+    "green" | "cyan" | "amber" | "purple",
+    React.CSSProperties
+  > = {
+    green: {
+      ["--rh-a" as any]: "oklch(0.78 0.16 150 / 0.55)",
+      ["--rh-b" as any]: "oklch(0.78 0.14 195 / 0.45)",
+      ["--rh-c" as any]: "oklch(0.86 0.12 60 / 0.35)",
+    },
+    cyan: {
+      ["--rh-a" as any]: "oklch(0.78 0.14 195 / 0.55)",
+      ["--rh-b" as any]: "oklch(0.68 0.12 230 / 0.42)",
+      ["--rh-c" as any]: "oklch(0.86 0.12 60 / 0.28)",
+    },
+    amber: {
+      ["--rh-a" as any]: "oklch(0.86 0.12 60 / 0.55)",
+      ["--rh-b" as any]: "oklch(0.78 0.16 150 / 0.35)",
+      ["--rh-c" as any]: "oklch(0.72 0.12 300 / 0.28)",
+    },
+    purple: {
+      ["--rh-a" as any]: "oklch(0.72 0.12 300 / 0.50)",
+      ["--rh-b" as any]: "oklch(0.78 0.14 195 / 0.35)",
+      ["--rh-c" as any]: "oklch(0.86 0.12 60 / 0.28)",
+    },
+  };
+
   return (
     <div
       className={cn(
-        "rounded-lg border border-muted bg-container p-3",
+        "rounded-xl border border-border bg-background/60 backdrop-blur p-3",
+        "rh-step",
         "flex items-start gap-3",
       )}
+      style={toneVars[tone]}
     >
       <div className="mt-0.5 shrink-0">
-        <div className="w-9 h-9 rounded-lg border border-border bg-background/70 flex items-center justify-center">
-          {icon}
+        <div className="w-9 h-9 rounded-xl border border-border bg-background/70 flex items-center justify-center rh-chip">
+          <span className="text-foreground">{icon}</span>
         </div>
       </div>
       <div className="min-w-0 flex-1">
@@ -85,6 +115,9 @@ function Step({
             <Circle className="w-4 h-4 text-muted-foreground" />
           )}
           <div className="font-medium truncate">{title}</div>
+          <span className={cn("ml-auto text-[11px] px-2 py-0.5 rounded-full rh-chip text-muted-foreground")}>
+            {done ? "Done" : "Next"}
+          </span>
         </div>
         <div className="mt-1 text-sm text-muted-foreground leading-relaxed">
           {body}
@@ -93,7 +126,7 @@ function Step({
       <button
         type="button"
         onClick={onClick}
-        className="shrink-0 rounded-md border border-border bg-background px-3 py-2 text-sm hover:bg-muted"
+        className="shrink-0 rounded-md border border-border bg-background/80 backdrop-blur px-3 py-2 text-sm hover:bg-muted rh-chip"
       >
         <span className="inline-flex items-center gap-1.5">
           {cta} <ArrowRight className="w-4 h-4" />
@@ -124,7 +157,7 @@ export function WorkspaceGuide({
       open={defaultOpen}
       className={cn("gradient-border rounded-xl p-[1px]", className)}
     >
-      <div className="rounded-xl bg-card/90 p-4">
+      <div className="rounded-xl rh-panel p-4">
         <summary className="cursor-pointer select-none">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -163,6 +196,7 @@ export function WorkspaceGuide({
             icon={<FolderUp className="w-4 h-4" />}
             onClick={() => onJump("import")}
             cta="Open import"
+            tone="green"
           />
           <Step
             done={categorizedEnough}
@@ -171,6 +205,7 @@ export function WorkspaceGuide({
             icon={<Tags className="w-4 h-4" />}
             onClick={() => onJump("categorize")}
             cta="Categorize"
+            tone="cyan"
           />
           <Step
             done={hasBudgets}
@@ -179,6 +214,7 @@ export function WorkspaceGuide({
             icon={<WalletCards className="w-4 h-4" />}
             onClick={() => onJump("envelopes")}
             cta="Open envelopes"
+            tone="amber"
           />
           <Step
             done={showAdvanced}
@@ -190,6 +226,7 @@ export function WorkspaceGuide({
               onJump("insights");
             }}
             cta={showAdvanced ? "View" : "Enable"}
+            tone="purple"
           />
         </div>
       </div>

@@ -293,3 +293,42 @@ Animated gradient for thinking text, creates a shimmering effect that moves acro
   -webkit-text-fill-color: transparent;
   animation: thinking-gradient 2s linear infinite;
 }
+
+/* --- Robinhood-ish accents (without full black theme) --- */
+.rh-panel {
+  background:
+    radial-gradient(700px circle at 20% 0%, oklch(0.93 0.08 150 / 0.45), transparent 55%),
+    radial-gradient(680px circle at 82% 38%, oklch(0.92 0.06 195 / 0.35), transparent 60%),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.9), oklch(0.99 0.01 260 / 0.9));
+}
+.theme-night .rh-panel {
+  background:
+    radial-gradient(700px circle at 20% 0%, oklch(0.42 0.09 150 / 0.35), transparent 55%),
+    radial-gradient(680px circle at 82% 38%, oklch(0.36 0.08 195 / 0.26), transparent 60%),
+    linear-gradient(to bottom, oklch(0.18 0.01 260 / 0.85), oklch(0.16 0.01 260 / 0.85));
+}
+
+.rh-step {
+  position: relative;
+  overflow: hidden;
+}
+.rh-step::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  opacity: 0.9;
+  pointer-events: none;
+  background:
+    radial-gradient(460px circle at 10% 10%, var(--rh-a), transparent 55%),
+    radial-gradient(460px circle at 90% 30%, var(--rh-b), transparent 55%);
+}
+.rh-step > * {
+  position: relative;
+}
+
+.rh-chip {
+  background:
+    linear-gradient(var(--color-background), var(--color-background)) padding-box,
+    linear-gradient(90deg, var(--rh-a), var(--rh-b), var(--rh-c)) border-box;
+  border: 1px solid transparent;
+}
