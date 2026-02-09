@@ -2,6 +2,10 @@
 
 import {
   MessageInput,
+  MessageInputFileButton,
+  MessageInputMcpConfigButton,
+  MessageInputMcpPromptButton,
+  MessageInputMcpResourceButton,
   MessageInputSubmitButton,
   MessageInputTextarea,
   MessageInputToolbar,
@@ -82,6 +86,10 @@ export default function InteractablesPage() {
                 <MessageInput variant="bordered">
                   <MessageInputTextarea placeholder="Ask about your budget…" />
                   <MessageInputToolbar>
+                    <MessageInputFileButton />
+                    <MessageInputMcpPromptButton />
+                    <MessageInputMcpResourceButton />
+                    <MessageInputMcpConfigButton />
                     <MessageInputSubmitButton />
                   </MessageInputToolbar>
                 </MessageInput>
