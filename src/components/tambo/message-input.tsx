@@ -44,6 +44,7 @@ import {
   type ResourceItem,
   type TamboEditor,
 } from "./text-editor";
+import { saveLocalCsvUpload } from "@/services/budget/local-csv";
 
 // Lazy load DictationButton for code splitting (framework-agnostic alternative to next/dynamic)
 // eslint-disable-next-line @typescript-eslint/promise-function-async
@@ -1254,18 +1255,39 @@ const MessageInputFileButton = React.forwardRef<
       if (csvFiles.length > 0) {
         const file = csvFiles[0]!;
         const text = await file.text();
-        const MAX_CHARS = 200_000;
-        if (text.length > MAX_CHARS) {
-          setSubmitError(
-            `CSV is too large to paste into chat (${text.length} chars). Use the Import Wizard on /interactables instead.`,
-          );
-        } else {
+        const TAMBO_MAX_MESSAGE_CHARS = 10_000;
+        const SAFE_BUDGET = 8_500; // leave room for prompt text + any tool formatting
+        const canPaste = text.length <= SAFE_BUDGET;
+
+        if (canPaste) {
           const payload = [
             `Please import this CSV into my budget data. Use importCsvPreview first, then importCsvCommit.`,
             ``,
             `Filename: ${file.name}`,
             ``,
             text,
+          ].join("\n");
+
+          const editor = editorRef.current;
+          if (editor) {
+            editor.setContent(payload);
+            editor.focus("end");
+          }
+          setValue(payload);
+          setSubmitError(null);
+        } else {
+          // Workaround for Tambo's message length limit: store locally and send a short reference key.
+          const upload = saveLocalCsvUpload({ filename: file.name, text });
+
+          const payload = [
+            `I attached a CSV file, but it’s too large to paste into chat (Tambo limit is ~${TAMBO_MAX_MESSAGE_CHARS} chars).`,
+            `The CSV is saved locally in my browser.`,
+            ``,
+            `Filename: ${file.name}`,
+            `Local key: ${upload.key}`,
+            ``,
+            `Please run: importCsvPreviewFromLocal({ key: "${upload.key}" })`,
+            `Then, after confirming the mapping, run: importCsvCommitFromLocal({ key: "${upload.key}", mapping: { ... } })`,
           ].join("\n");
 
           const editor = editorRef.current;

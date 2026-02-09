@@ -2,6 +2,7 @@ import { getBudgetState } from "@/lib/budget/store";
 import type { UUID } from "@/lib/budget/types";
 import { commitCsvImport, previewCsvImport, type CsvMapping } from "@/services/budget/import";
 import { getOrCreateCategoryByName, replaceTransactionSplits } from "@/services/budget/model";
+import { getLocalCsvUpload } from "@/services/budget/local-csv";
 import {
   listEnvelopeSummary,
   listUncategorizedTransactions,
@@ -22,6 +23,25 @@ export async function importCsvCommit(args: {
     csvText: args.csvText,
     mapping: args.mapping,
     filename: args.filename,
+    defaultCurrencyCode: getBudgetState().settings.defaultCurrencyCode,
+  });
+}
+
+export async function importCsvPreviewFromLocal(args: { key: string }) {
+  const upload = getLocalCsvUpload(args.key);
+  return previewCsvImport(upload.text);
+}
+
+export async function importCsvCommitFromLocal(args: {
+  key: string;
+  mapping: CsvMapping;
+  filename?: string;
+}) {
+  const upload = getLocalCsvUpload(args.key);
+  return commitCsvImport({
+    csvText: upload.text,
+    mapping: args.mapping,
+    filename: args.filename ?? upload.filename,
     defaultCurrencyCode: getBudgetState().settings.defaultCurrencyCode,
   });
 }

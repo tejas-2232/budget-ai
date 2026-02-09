@@ -30,7 +30,9 @@ import {
   getSpendingTrend,
   getUncategorizedTransactions,
   importCsvCommit,
+  importCsvCommitFromLocal,
   importCsvPreview,
+  importCsvPreviewFromLocal,
   setEnvelopeBudget,
 } from "@/services/budget/tools";
 import type { TamboComponent } from "@tambo-ai/react";
@@ -79,6 +81,72 @@ export const tools: TamboTool[] = [
     tool: importCsvCommit,
     inputSchema: z.object({
       csvText: z.string().describe("Raw CSV text including header row"),
+      filename: z.string().optional(),
+      mapping: z.object({
+        date: z.string(),
+        account: z.string(),
+        amount: z.string(),
+        currency: z.string().optional(),
+        description: z.string().optional(),
+        merchant: z.string().optional(),
+        category: z.string().optional(),
+        tags: z.string().optional(),
+        notes: z.string().optional(),
+      }),
+    }),
+    outputSchema: z.object({
+      importJobId: z.string(),
+      totalRows: z.number(),
+      successRows: z.number(),
+      failedRows: z.number(),
+      created: z.object({
+        accounts: z.number(),
+        merchants: z.number(),
+        categories: z.number(),
+        transactions: z.number(),
+        tags: z.number(),
+      }),
+      errors: z.array(z.object({ rowNumber: z.number(), message: z.string() })),
+    }),
+  },
+  {
+    name: "importCsvPreviewFromLocal",
+    description:
+      "Preview a locally-attached transaction CSV by key (workaround for chat message length limits).",
+    tool: importCsvPreviewFromLocal,
+    inputSchema: z.object({
+      key: z
+        .string()
+        .describe("Local CSV key produced by the file attachment flow"),
+    }),
+    outputSchema: z.object({
+      headers: z.array(z.string()),
+      sampleRows: z.array(z.record(z.string(), z.string())),
+      suggestedMapping: z
+        .object({
+          date: z.string().optional(),
+          account: z.string().optional(),
+          amount: z.string().optional(),
+          currency: z.string().optional(),
+          description: z.string().optional(),
+          merchant: z.string().optional(),
+          category: z.string().optional(),
+          tags: z.string().optional(),
+          notes: z.string().optional(),
+        })
+        .optional(),
+      rowCount: z.number(),
+    }),
+  },
+  {
+    name: "importCsvCommitFromLocal",
+    description:
+      "Import a locally-attached transaction CSV by key into local storage.",
+    tool: importCsvCommitFromLocal,
+    inputSchema: z.object({
+      key: z
+        .string()
+        .describe("Local CSV key produced by the file attachment flow"),
       filename: z.string().optional(),
       mapping: z.object({
         date: z.string(),
