@@ -98,6 +98,31 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
     }
   };
 
+  const loadBigSample = async () => {
+    try {
+      setIsBusy(true);
+      setError(null);
+      const path = "/sample-transactions-big-2025H2-2026-01.csv";
+      const res = await fetch(path);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} while loading big sample CSV`);
+      }
+      const text = await res.text();
+      setFilename(path.slice(1));
+      setCsvText(text);
+      loadPreview(text);
+      setShowPreview(true);
+    } catch (e) {
+      setError({
+        title: "We couldn’t load the big sample file.",
+        body: "Refresh the page and try again.",
+        details: e instanceof Error ? e.message : undefined,
+      });
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
   const canCommit =
     !!preview &&
     !!mapping.date &&
@@ -144,6 +169,17 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
             )}
           >
             Load sample CSV
+          </button>
+          <button
+            type="button"
+            onClick={loadBigSample}
+            disabled={isBusy}
+            className={cn(
+              "mt-2 w-full rounded-md px-3 py-2 text-sm border border-border bg-background hover:bg-muted",
+              isBusy && "opacity-50 cursor-not-allowed",
+            )}
+          >
+            Load big sample (Jul 2025 → Jan 2026)
           </button>
           <div className="text-xs text-muted-foreground mt-2 leading-relaxed">
             We’ll ask you to confirm the required columns before importing.

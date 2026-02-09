@@ -15,6 +15,45 @@ export function monthToRange(month: string): { start: string; endExclusive: stri
   return { start, endExclusive };
 }
 
+function listMonthsBetweenInclusive(minMonth: string, maxMonth: string): string[] {
+  const [minY, minM] = minMonth.split("-").map(Number);
+  const [maxY, maxM] = maxMonth.split("-").map(Number);
+  if (!minY || !minM || !maxY || !maxM) return [];
+
+  const months: string[] = [];
+  let y = minY;
+  let m = minM;
+  while (y < maxY || (y === maxY && m <= maxM)) {
+    months.push(`${String(y).padStart(4, "0")}-${String(m).padStart(2, "0")}`);
+    m += 1;
+    if (m === 13) {
+      m = 1;
+      y += 1;
+    }
+  }
+  return months;
+}
+
+export function listAvailableMonthsFromState(
+  state: ReturnType<typeof getBudgetState>,
+): string[] {
+  const months = Object.values(state.transactions)
+    .map((tx) => tx.transaction_date.slice(0, 7))
+    .filter((m) => /^\d{4}-\d{2}$/.test(m));
+
+  if (months.length === 0) return [];
+
+  // YYYY-MM is lexicographically sortable
+  const minMonth = months.reduce((a, b) => (a < b ? a : b));
+  const maxMonth = months.reduce((a, b) => (a > b ? a : b));
+
+  return listMonthsBetweenInclusive(minMonth, maxMonth);
+}
+
+export function listAvailableMonths(): string[] {
+  return listAvailableMonthsFromState(getBudgetState());
+}
+
 export function listEnvelopeSummary(args: { month: string }) {
   return listEnvelopeSummaryFromState(getBudgetState(), args);
 }

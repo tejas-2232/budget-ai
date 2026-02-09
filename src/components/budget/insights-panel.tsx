@@ -58,16 +58,18 @@ export function InsightsPanel({ month, title, className }: InsightsPanelProps) {
             {selectedMonth}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground">Month</label>
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="rounded-md border border-border bg-background px-2 py-1 text-sm"
-            aria-label="Select month"
-          />
-        </div>
+        {!month && (
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-muted-foreground">Month</label>
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="rounded-md border border-border bg-background px-2 py-1 text-sm"
+              aria-label="Select month"
+            />
+          </div>
+        )}
       </div>
 
       {!hasData ? (

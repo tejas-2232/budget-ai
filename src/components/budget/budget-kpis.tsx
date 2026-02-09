@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useBudgetState } from "@/lib/budget/store";
 import { getCurrentMonthYyyyMm, monthToRange } from "@/services/budget/queries";
 import { z } from "zod";
+import * as React from "react";
 
 export const budgetKpisSchema = z.object({
   month: z
@@ -23,7 +24,15 @@ function formatMoney(n: number) {
 
 export function BudgetKpis({ month, title, className }: BudgetKpisProps) {
   const state = useBudgetState((s) => s);
-  const m = month ?? getCurrentMonthYyyyMm();
+  const [selectedMonth, setSelectedMonth] = React.useState(
+    month ?? getCurrentMonthYyyyMm(),
+  );
+
+  React.useEffect(() => {
+    if (month) setSelectedMonth(month);
+  }, [month]);
+
+  const m = selectedMonth;
   const { start, endExclusive } = monthToRange(m);
 
   let income = 0;
@@ -53,6 +62,15 @@ export function BudgetKpis({ month, title, className }: BudgetKpisProps) {
             {m} <span className="text-sm font-normal text-muted-foreground">({currency})</span>
           </div>
         </div>
+        {!month && (
+          <input
+            type="month"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="rounded-md border border-border bg-background px-2 py-1 text-sm"
+            aria-label="Select month"
+          />
+        )}
         <div className="text-xs text-muted-foreground">
           {Object.keys(state.transactions).length} tx total
         </div>

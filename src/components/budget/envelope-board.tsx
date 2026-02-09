@@ -56,15 +56,17 @@ export function EnvelopeBoard({ month, title, className }: EnvelopeBoardProps) {
           <div className="text-sm text-muted-foreground">{title ?? "Envelopes"}</div>
           <div className="text-xl font-semibold tracking-tight">{selectedMonth}</div>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground">Month</label>
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="rounded-md border border-border bg-background px-2 py-1 text-sm"
-          />
-        </div>
+        {!month && (
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-muted-foreground">Month</label>
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="rounded-md border border-border bg-background px-2 py-1 text-sm"
+            />
+          </div>
+        )}
       </div>
 
       <div className="mt-4 space-y-3">

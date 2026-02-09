@@ -70,21 +70,31 @@ export const MessageThreadFull = React.forwardRef<
   const defaultSuggestions: Suggestion[] = [
     {
       id: "suggestion-1",
-      title: "Get started",
-      detailedSuggestion: "What can you help me with?",
+      title: "Import CSV",
+      detailedSuggestion:
+        "I want to import transactions. What CSV columns do you need, and can you show me a preview before committing?",
       messageId: "welcome-query",
     },
     {
       id: "suggestion-2",
-      title: "Learn more",
-      detailedSuggestion: "Tell me about your capabilities.",
+      title: "Find uncategorized",
+      detailedSuggestion:
+        "Show me uncategorized transactions for this month and suggest categories based on merchant/description.",
       messageId: "capabilities-query",
     },
     {
       id: "suggestion-3",
-      title: "Examples",
-      detailedSuggestion: "Show me some example queries I can try.",
+      title: "Set envelope budgets",
+      detailedSuggestion:
+        "Help me set envelope budgets for this month (Rent, Groceries, Eating Out, Transport) based on recent spending.",
       messageId: "examples-query",
+    },
+    {
+      id: "suggestion-4",
+      title: "Insights",
+      detailedSuggestion:
+        "Show spending by category and a spending trend over time. Call out the biggest drivers.",
+      messageId: "insights-query",
     },
   ];
 

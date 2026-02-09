@@ -123,13 +123,15 @@ export function TransactionsTable({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="rounded-md border border-border bg-background px-2 py-1 text-sm"
-            aria-label="Select month"
-          />
+          {!month && (
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="rounded-md border border-border bg-background px-2 py-1 text-sm"
+              aria-label="Select month"
+            />
+          )}
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}

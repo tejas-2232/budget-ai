@@ -23,10 +23,29 @@ import { InsightsPanel } from "@/components/budget/insights-panel";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/landing/ThemeToggle";
+import { useBudgetState } from "@/lib/budget/store";
+import {
+  getCurrentMonthYyyyMm,
+  listAvailableMonthsFromState,
+} from "@/services/budget/queries";
+import { MonthPicker } from "@/components/budget/month-picker";
+import * as React from "react";
 
 export default function InteractablesPage() {
   const [isChatOpen, setIsChatOpen] = useState(true);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const state = useBudgetState((s) => s);
+  const months = React.useMemo(() => listAvailableMonthsFromState(state), [state]);
+
+  const [workspaceMonth, setWorkspaceMonth] = React.useState(() => getCurrentMonthYyyyMm());
+
+  React.useEffect(() => {
+    if (months.length === 0) return;
+    // If current selection isn't in data (common for sample CSV), jump to latest month with data.
+    if (!months.includes(workspaceMonth)) {
+      setWorkspaceMonth(months[months.length - 1]!);
+    }
+  }, [months, workspaceMonth]);
 
   return (
     <TamboProvider
@@ -39,7 +58,7 @@ export default function InteractablesPage() {
         {/* Chat Sidebar */}
         <div
           className={`${
-            isChatOpen ? "w-80" : "w-0"
+            isChatOpen ? "w-[380px] md:w-[420px] lg:w-[460px]" : "w-0"
           } border-r border-border bg-card transition-all duration-300 flex flex-col relative`}
         >
           {isChatOpen && (
@@ -108,6 +127,13 @@ export default function InteractablesPage() {
                 >
                   Chat-only
                 </Link>
+                <MonthPicker
+                  value={workspaceMonth}
+                  months={months.length ? months : [workspaceMonth]}
+                  onChange={setWorkspaceMonth}
+                  className="ml-1"
+                  dense
+                />
                 <ThemeToggle />
                 <button
                   type="button"
@@ -122,11 +148,23 @@ export default function InteractablesPage() {
 
           <div className="p-6 md:p-8">
             <div className="max-w-6xl mx-auto space-y-4">
-              <BudgetKpis title="This month at a glance" />
+              <div className="gradient-border rounded-xl p-[1px]">
+                <BudgetKpis
+                  title="This month at a glance"
+                  month={workspaceMonth}
+                  className="border-0 rounded-xl bg-card/90"
+                />
+              </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <ImportWizard title="Import transactions" />
-                <div className="rounded-xl border border-border bg-card p-4">
+                <div className="gradient-border rounded-xl p-[1px]">
+                  <ImportWizard
+                    title="Import transactions"
+                    className="border-0 rounded-xl bg-card/90"
+                  />
+                </div>
+                <div className="gradient-border rounded-xl p-[1px]">
+                  <div className="rounded-xl bg-card/90 p-4">
                   <div className="text-sm text-muted-foreground">Next step</div>
                   <div className="text-xl font-semibold tracking-tight">
                     Categorize → budget
@@ -138,15 +176,30 @@ export default function InteractablesPage() {
                   <div className="mt-4 text-xs text-muted-foreground">
                     Tip: Use the assistant to batch-categorize merchants (e.g. “Categorize all Amazon as Shopping”).
                   </div>
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <EnvelopeBoard title="Envelopes" />
-                <TransactionsTable title="Uncategorized transactions" onlyUncategorized />
+                <div className="gradient-border rounded-xl p-[1px]">
+                  <EnvelopeBoard
+                    title="Envelopes"
+                    month={workspaceMonth}
+                    className="border-0 rounded-xl bg-card/90"
+                  />
+                </div>
+                <div className="gradient-border rounded-xl p-[1px]">
+                  <TransactionsTable
+                    title="Uncategorized transactions"
+                    month={workspaceMonth}
+                    onlyUncategorized
+                    className="border-0 rounded-xl bg-card/90"
+                  />
+                </div>
               </div>
 
-              <details className="rounded-xl border border-border bg-card p-4">
+              <details className="gradient-border rounded-xl p-[1px]">
+                <div className="rounded-xl bg-card/90 p-4">
                 <summary className="cursor-pointer select-none">
                   <div className="flex items-center justify-between gap-3">
                     <div>
@@ -163,12 +216,20 @@ export default function InteractablesPage() {
                   </div>
                 </summary>
                 <div className="mt-4">
-                  <TransactionsTable title="All transactions" />
+                  <div className="gradient-border rounded-xl p-[1px]">
+                    <TransactionsTable
+                      title="All transactions"
+                      month={workspaceMonth}
+                      className="border-0 rounded-xl bg-card/90"
+                    />
+                  </div>
+                </div>
                 </div>
               </details>
 
               {showAdvanced && (
-                <details open className="rounded-xl border border-border bg-card p-4">
+                <details open className="gradient-border rounded-xl p-[1px]">
+                  <div className="rounded-xl bg-card/90 p-4">
                   <summary className="cursor-pointer select-none">
                     <div className="flex items-center justify-between gap-3">
                       <div>
@@ -185,7 +246,13 @@ export default function InteractablesPage() {
                     </div>
                   </summary>
                   <div className="mt-4">
-                    <InsightsPanel />
+                    <div className="gradient-border rounded-xl p-[1px]">
+                      <InsightsPanel
+                        month={workspaceMonth}
+                        className="border-0 rounded-xl bg-card/90"
+                      />
+                    </div>
+                  </div>
                   </div>
                 </details>
               )}

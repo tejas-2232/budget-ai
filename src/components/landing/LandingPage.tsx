@@ -306,7 +306,7 @@ export default function LandingPage() {
             <InteractiveCard className="p-5 gradient-border">
               <div className="text-sm font-semibold">Sample CSV</div>
               <div className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Download a ready-made file to test the full flow.
+                Download a ready-made file to test the full flow (small or big dataset).
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <a
@@ -317,7 +317,17 @@ export default function LandingPage() {
                     "border border-border hover:bg-muted",
                   )}
                 >
-                  Download
+                  Download (small)
+                </a>
+                <a
+                  href="/sample-transactions-big-2025H2-2026-01.csv"
+                  download
+                  className={cn(
+                    "px-4 py-2 rounded-md text-sm font-medium",
+                    "border border-border hover:bg-muted",
+                  )}
+                >
+                  Download (big)
                 </a>
                 <a
                   href="/interactables"
