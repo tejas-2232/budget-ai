@@ -13,6 +13,7 @@ import { HeroMedia } from "./HeroMedia";
 import { HeroWidget } from "./HeroWidget";
 import { Sparkles, WandSparkles } from "lucide-react";
 import { FloatingIcons } from "./FloatingIcons";
+import { WorkflowGuide } from "./WorkflowGuide";
 
 const SECTION_IDS = ["home", "projects", "about"] as const;
 
@@ -221,6 +222,10 @@ export default function LandingPage() {
                 Monthly budget rows per category so graphs and totals stay predictable.
               </div>
             </InteractiveCard>
+          </div>
+
+          <div className="mt-8">
+            <WorkflowGuide />
           </div>
 
           <div className="mt-10">

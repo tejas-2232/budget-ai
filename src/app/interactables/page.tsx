@@ -31,9 +31,11 @@ import { useBudgetState } from "@/lib/budget/store";
 import {
   getCurrentMonthYyyyMm,
   listAvailableMonthsFromState,
+  monthToRange,
 } from "@/services/budget/queries";
 import { MonthPicker } from "@/components/budget/month-picker";
 import * as React from "react";
+import { WorkspaceGuide } from "@/components/budget/workspace-guide";
 
 export default function InteractablesPage() {
   const [isChatOpen, setIsChatOpen] = useState(true);
@@ -50,6 +52,35 @@ export default function InteractablesPage() {
       setWorkspaceMonth(months[months.length - 1]!);
     }
   }, [months, workspaceMonth]);
+
+  const [flashId, setFlashId] = React.useState<string | null>(null);
+  const jumpTo = React.useCallback((id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setFlashId(id);
+    window.history.replaceState(null, "", `#${id}`);
+    window.setTimeout(() => setFlashId((prev) => (prev === id ? null : prev)), 1100);
+  }, []);
+
+  const stats = React.useMemo(() => {
+    const { start, endExclusive } = monthToRange(workspaceMonth);
+    const splitTxIds = new Set(Object.values(state.splits).map((s) => s.transaction_id));
+
+    let txInMonth = 0;
+    let uncategorizedInMonth = 0;
+    Object.values(state.transactions).forEach((tx) => {
+      if (tx.transaction_date < start || tx.transaction_date >= endExclusive) return;
+      txInMonth += 1;
+      if (!splitTxIds.has(tx.transaction_id)) uncategorizedInMonth += 1;
+    });
+
+    const budgetsInMonth = Object.values(state.budgets).filter(
+      (b) => b.start_date === `${workspaceMonth}-01`,
+    ).length;
+
+    return { txInMonth, uncategorizedInMonth, budgetsInMonth };
+  }, [state, workspaceMonth]);
 
   return (
     <TamboProvider
@@ -156,6 +187,14 @@ export default function InteractablesPage() {
 
           <div className="p-6 md:p-8">
             <div className="max-w-6xl mx-auto space-y-4">
+              <WorkspaceGuide
+                month={workspaceMonth}
+                stats={stats}
+                showAdvanced={showAdvanced}
+                setShowAdvanced={setShowAdvanced}
+                onJump={jumpTo}
+              />
+
               <div className="gradient-border rounded-xl p-[1px]">
                 <BudgetKpis
                   title="This month at a glance"
@@ -164,11 +203,15 @@ export default function InteractablesPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div
+                id="import"
+                className={cn("grid grid-cols-1 lg:grid-cols-2 gap-4", flashId === "import" && "animate-flash")}
+              >
                 <div className="gradient-border rounded-xl p-[1px]">
                   <ImportWizard
                     title="Import transactions"
                     className="border-0 rounded-xl bg-card/90"
+                    onImported={() => jumpTo("categorize")}
                   />
                 </div>
                 <div className="gradient-border rounded-xl p-[1px]">
@@ -190,19 +233,29 @@ export default function InteractablesPage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="gradient-border rounded-xl p-[1px]">
-                  <EnvelopeBoard
+                  <div
+                    id="envelopes"
+                    className={cn("rounded-xl", flashId === "envelopes" && "animate-flash")}
+                  >
+                    <EnvelopeBoard
                     title="Envelopes"
                     month={workspaceMonth}
                     className="border-0 rounded-xl bg-card/90"
                   />
+                  </div>
                 </div>
                 <div className="gradient-border rounded-xl p-[1px]">
-                  <TransactionsTable
+                  <div
+                    id="categorize"
+                    className={cn("rounded-xl", flashId === "categorize" && "animate-flash")}
+                  >
+                    <TransactionsTable
                     title="Uncategorized transactions"
                     month={workspaceMonth}
                     onlyUncategorized
                     className="border-0 rounded-xl bg-card/90"
                   />
+                  </div>
                 </div>
               </div>
 
@@ -253,7 +306,10 @@ export default function InteractablesPage() {
                       </span>
                     </div>
                   </summary>
-                  <div className="mt-4">
+                  <div
+                    id="insights"
+                    className={cn("mt-4", flashId === "insights" && "animate-flash")}
+                  >
                     <div className="gradient-border rounded-xl p-[1px]">
                       <InsightsPanel
                         month={workspaceMonth}

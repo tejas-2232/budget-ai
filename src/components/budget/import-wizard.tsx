@@ -17,6 +17,7 @@ export const importWizardSchema = z.object({
 
 export type ImportWizardProps = z.infer<typeof importWizardSchema> & {
   className?: string;
+  onImported?: (result: ImportCommitResult) => void;
 };
 
 const FIELD_LABELS: Array<{ key: keyof CsvMapping; label: string; required?: boolean }> = [
@@ -31,7 +32,7 @@ const FIELD_LABELS: Array<{ key: keyof CsvMapping; label: string; required?: boo
   { key: "notes", label: "notes" },
 ];
 
-export function ImportWizard({ title, className }: ImportWizardProps) {
+export function ImportWizard({ title, className, onImported }: ImportWizardProps) {
   const state = useBudgetState((s) => s);
   const [csvText, setCsvText] = React.useState("");
   const [filename, setFilename] = React.useState<string>("import.csv");
@@ -342,6 +343,7 @@ export function ImportWizard({ title, className }: ImportWizardProps) {
                 try {
                   const res = commitCsvImport({ csvText, mapping, filename });
                   setResult(res);
+                  onImported?.(res);
                   if (res.failedRows > 0) {
                     setError({
                       title: "Some rows need attention.",
